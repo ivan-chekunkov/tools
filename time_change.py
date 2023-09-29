@@ -2,6 +2,32 @@ import datetime
 import json
 import sys
 import winreg
+import os
+
+HELP_TEXT = [
+    "Программа для установки нужной даты со случайным временем!\n",
+    "\n",
+    'Введите "help" или "h" в любом регистре для получения помощи.\n',
+    "Пример:\n",
+    " - python {name} help\n",
+    "\n",
+    'Запустите приложение по шаблону "python {name} arg arg arg" в',
+    " аргументах задайте дату в порядке DD MM YYYY\n",
+    "Пример:\n",
+    " - python {name} 25 9 2023 - установит 25 сентября 2023 года\n",
+    " - python {name} 25 9 - установит 25 сентября текущего года\n",
+    " - python {name} 25 - установит 25 число текучего месяца и года\n",
+    "\n",
+    "Для включения синхронизации времени с сервером",
+    ' NTP введите "clear" или "c"\n',
+    "Пример:\n",
+    " - python {name} clear\n",
+    "\n",
+    "Запуск без параметров позволит взять данные для",
+    ' даты из файла "date.json"\n',
+    "Пример:\n",
+    " - python {name}\n",
+]
 
 
 class RegEdit:
@@ -33,6 +59,17 @@ class RegEdit:
         print("enable_ubdate_time")
         winreg.SetValueEx(key, "Type", None, winreg.REG_SZ, "NTP")
         winreg.CloseKey(key)
+
+
+def help_argument():
+    print("".join(HELP_TEXT).format(name=os.path.basename(__file__)))
+    sys.exit()
+
+
+def clear_date():
+    RegEdit.enable_ubdate_time()
+    os.system("w32tm /resync")
+    sys.exit()
 
 
 def get_date_today() -> tuple[int, int, int]:
