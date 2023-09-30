@@ -94,5 +94,35 @@ def get_date_from_file() -> tuple:
     return year, month, day
 
 
+def get_date_from_arguments(arguments: list[str]):
+    data: dict = {}
+    if len(arguments) >= 1:
+        data["day"] = arguments[0]
+    if len(arguments) >= 2:
+        data["month"] = arguments[1]
+    if len(arguments) >= 3:
+        data["year"] = arguments[2]
+    year, month, day = get_date_today()
+    try:
+        year = int(data.get("year", year))
+        month = int(data.get("month", month))
+        day = int(data.get("day", day))
+    except Exception as error:
+        print(error)
+    return year, month, day
+
+
+def check_arguments():
+    arguments = sys.argv[1:]
+    if len(arguments) == 0:
+        return get_date_from_file()
+    if arguments[0].lower() in ("help" or "h"):
+        help_argument()
+    if arguments[0].lower() in ("clear" or "c"):
+        clear_date()
+    return get_date_from_arguments(arguments)
+
+
+
 if __name__ == "__main__":
     pass
