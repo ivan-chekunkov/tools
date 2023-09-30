@@ -123,5 +123,6 @@ def check_arguments():
     return get_date_from_arguments(arguments)
 
 
+
 if __name__ == "__main__":
     pass
