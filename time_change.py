@@ -1,7 +1,9 @@
 import datetime
-import json
-import sys
+import win32api
+from random import randrange as rndrg
 import winreg
+import sys
+import json
 import os
 
 HELP_TEXT = [
@@ -61,6 +63,27 @@ class RegEdit:
         winreg.CloseKey(key)
 
 
+def get_random_time():
+    return (rndrg(0, 22), rndrg(0, 59), rndrg(0, 59), rndrg(0, 999))
+
+
+def win_set_time(date_tuple, time_tuple):
+    RegEdit.disable_ubdate_time()
+    try:
+        day_of_week = datetime.datetime(*date_tuple).isocalendar()[2]
+    except Exception as error:
+        print(error)
+        sys.exit()
+    try:
+        new_date = (
+            date_tuple[:2] + (day_of_week,) + (date_tuple[2],) + time_tuple
+        )
+    except Exception as error:
+        print(error)
+        sys.exit()
+    win32api.SetSystemTime(*new_date)
+
+
 def help_argument():
     print("".join(HELP_TEXT).format(name=os.path.basename(__file__)))
     sys.exit()
@@ -77,13 +100,14 @@ def get_date_today() -> tuple[int, int, int]:
     return today.year, today.month, today.day
 
 
-def get_date_from_file() -> tuple:
-    try:
-        with open("date.json", "r", encoding="utf-8") as file:
-            data = json.load(file)
-    except Exception as error:
-        print(error)
-        sys.exit()
+def get_date_from_arguments(arguments: list[str]):
+    data: dict = {}
+    if len(arguments) >= 1:
+        data["day"] = arguments[0]
+    if len(arguments) >= 2:
+        data["month"] = arguments[1]
+    if len(arguments) >= 3:
+        data["year"] = arguments[2]
     year, month, day = get_date_today()
     try:
         year = int(data.get("year", year))
@@ -94,14 +118,13 @@ def get_date_from_file() -> tuple:
     return year, month, day
 
 
-def get_date_from_arguments(arguments: list[str]):
-    data: dict = {}
-    if len(arguments) >= 1:
-        data["day"] = arguments[0]
-    if len(arguments) >= 2:
-        data["month"] = arguments[1]
-    if len(arguments) >= 3:
-        data["year"] = arguments[2]
+def get_date_from_file() -> tuple:
+    try:
+        with open("date.json", "r", encoding="utf-8") as file:
+            data = json.load(file)
+    except Exception as error:
+        print(error)
+        sys.exit()
     year, month, day = get_date_today()
     try:
         year = int(data.get("year", year))
@@ -123,6 +146,7 @@ def check_arguments():
     return get_date_from_arguments(arguments)
 
 
-
 if __name__ == "__main__":
-    pass
+    date_tuple = check_arguments()
+    time_tuple = get_random_time()
+    win_set_time(date_tuple, time_tuple)
