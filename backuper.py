@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 
 def get_logger(name: str, level: int) -> logging.Logger:
@@ -21,3 +22,15 @@ def get_logger(name: str, level: int) -> logging.Logger:
 main_log = get_logger("main_logger", logging.INFO)
 success_log = get_logger("success_logger", logging.INFO)
 error_log = get_logger("error_logger", logging.ERROR)
+
+
+class NotDriveName(Exception):
+    pass
+
+
+def create_path(path: Path) -> bool:
+    if not path.parent.exists():
+        if not path.parents[-1].exists():
+            raise NotDriveName
+        path.parent.mkdir(parents=True)
+        return True
