@@ -1,4 +1,5 @@
 import logging
+import shutil
 from pathlib import Path
 
 
@@ -34,3 +35,18 @@ def create_path(path: Path) -> bool:
             raise NotDriveName
         path.parent.mkdir(parents=True)
         return True
+
+
+def copy_file(old_path: Path, new_path: Path) -> None:
+    global COUNT_FILES
+    global ERRORS
+    if new_path.is_dir() and new_path.exists():
+        return
+    create_path(Path(new_path))
+    try:
+        shutil.copy(old_path, new_path)
+        COUNT_FILES += 1
+        success_log.info("File {} copy in {}".format(old_path, new_path))
+    except Exception as error:
+        ERRORS += 1
+        error_log.error(error)
