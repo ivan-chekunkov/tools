@@ -24,6 +24,9 @@ main_log = get_logger("main_logger", logging.INFO)
 success_log = get_logger("success_logger", logging.INFO)
 error_log = get_logger("error_logger", logging.ERROR)
 
+COUNT_FILES = 0
+ERRORS = 0
+
 
 class NotDriveName(Exception):
     pass
@@ -50,3 +53,17 @@ def copy_file(old_path: Path, new_path: Path) -> None:
     except Exception as error:
         ERRORS += 1
         error_log.error(error)
+
+
+def view_path(root: Path, path: Path, out_root: Path, step=""):
+    files_and_dirs = root.joinpath(path).iterdir()
+    if not files_and_dirs:
+        copy_file(root.joinpath(path), out_root.joinpath(path))
+    for name in files_and_dirs:
+        if name.is_dir():
+            view_path(root, name, out_root, step=step + "--")
+        new_path = out_root.joinpath(
+            str(name).replace(str(root).rstrip("\\") + "\\", "")
+        )
+        copy_file(root.joinpath(name), new_path)
+        main_log.info("{}{} {}".format(step, "|", new_path))
